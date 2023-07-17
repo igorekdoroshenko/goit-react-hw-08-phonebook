@@ -40,8 +40,8 @@
 // };
 import { FilterWrapper, FilterLabel, FilterInput } from './Filter.style';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectFilter } from 'redux/selectors';
-import { setFilter } from 'redux/filterSlice';
+import { selectFilter } from 'redux/contacts/selectors';
+import { setFilter } from 'redux/filter/filterSlice';
 
 
 const Filter = () => {

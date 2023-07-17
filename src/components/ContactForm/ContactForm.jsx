@@ -53,8 +53,8 @@ import { Form, Label, Button, Input } from './ContactForm.style';
 import { useState } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { selectContacts } from 'redux/selectors';
-import { addContacts } from 'redux/operations';
+import { selectContacts } from 'redux/contacts/selectors';
+import { addContacts } from 'redux/contacts/contactsOperations';
 
 
 const ContactForm = () => {

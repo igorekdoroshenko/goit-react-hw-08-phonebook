@@ -82,7 +82,11 @@
 
 import { createSlice, isAnyOf } from '@reduxjs/toolkit';
 
-import { fetchContacts, addContacts, deleteContacts } from './operations';
+import {
+  fetchContacts,
+  addContacts,
+  deleteContacts,
+} from './contactsOperations';
 
 const getContacts = type =>
   isAnyOf(fetchContacts[type], addContacts[type], deleteContacts[type]);

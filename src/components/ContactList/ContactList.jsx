@@ -69,8 +69,8 @@
 import React from 'react';
 import { ContactWriper, ContactItem, ContactButton } from './ContactList.style';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectVisibleContacts } from 'redux/selectors';
-import { deleteContacts } from 'redux/operations';
+import { selectVisibleContacts } from 'redux/contacts/selectors';
+import { deleteContacts } from 'redux/contacts/contactsOperations';
 
 // Компонент списку контактів
 const ContactList = () => {

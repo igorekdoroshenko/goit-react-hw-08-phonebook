@@ -7,17 +7,15 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import { contactsReducer } from './contactsSlice';
-import { filterReducer } from './filterSlice';
-
+import { contactsReducer } from './contacts/contactsSlice';
+import { filterReducer } from './filter/filterSlice';
 
 export const store = configureStore({
   reducer: {
-    contacts: contactsReducer, 
-    filter: filterReducer, 
+    contacts: contactsReducer,
+    filter: filterReducer,
   },
 
-  
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
@@ -25,4 +23,3 @@ export const store = configureStore({
       },
     }),
 });
-
