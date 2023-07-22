@@ -1,135 +1,93 @@
-import { Form, Label, Button, Input } from './ContactForm.style';
-
-// import React, { useState } from 'react';
-// import { useAddContactMutation } from 'redux/contactsSlice';
-// import { useGetContactsQuery } from 'redux/contactsSlice';
-
-// export const ContactForm = () => {
-//   // Стан компонента
-//   const [name, setName] = useState('');
-//   const [phone, setPhone] = useState('');
-//   // Виклик хука `useAddContactMutation` для виконання мутації додавання контакту
-//   const [addContact] = useAddContactMutation();
-//   // Виклик хука `useGetContactsQuery` для отримання списку контактів
-//   const { data: contacts } = useGetContactsQuery();
-
-//   // Обробник зміни значень полів вводу
-//   const handleChange = e => {
-//     const { value, name } = e.currentTarget;
-
-//     switch (name) {
-//       case 'name':
-//         setName(value);
-//         break;
-//       case 'phone':
-//         setPhone(value);
-//         break;
-
-//       default:
-//         break;
-//     }
-//   };
-
-//     // Обробник подання форми
-//   const handleSubmit = evt => {
-//     evt.preventDefault();
-
-//     // Перевірка, чи існує контакт з таким же ім'ям
-//     if (contacts.find(contact => contact.name === name)) {
-//       return window.alert(`${name} is already in contacts.`);
-//     }
-//     // Виклик мутації додавання контакту з використанням значень з полів вводу
-//     addContact({ name, phone });
-
-//     // Скидання значень полів вводу
-//     reset();
-//   };
-//     // Скидання значень полів вводу
-//   const reset = () => {
-//     setName('');
-//     setPhone('');
-//   };
-
-import { useState } from 'react';
-
 import { useSelector, useDispatch } from 'react-redux';
-import { selectContacts } from 'redux/contacts/selectors';
-import { addContacts } from 'redux/contacts/contactsOperations';
+import { addContact } from 'redux/contacts/contactsOperations';
 
+import { Form, Label, Button, Input } from './ContactForm.styled';
+import React, { useState } from 'react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ContactForm = () => {
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [number, setNumber] = useState('');
 
-  const contacts = useSelector(selectContacts);
   const dispatch = useDispatch();
-
-  const handleSubmit = e => {
-    e.preventDefault();
-
-    // Перевірка, чи існує контакт з таким же ім'ям
-    if (contacts.find(contact => contact.name === name)) {
-      return window.alert(`${name} is already in contacts.`);
-    }
-
-    dispatch(addContacts({ name, phone }));
-    setName('');
-    setPhone('');
-
-    // Скидання значень полів вводу
-    reset();
-  };
-    // Скидання значень полів вводу
-  const reset = () => {
-    setName('');
-    setPhone('');
-
-  };
+  const contacts = useSelector(state => state.contacts.contacts);
 
   const handleChange = e => {
-    const { name, value } = e.target;
+    const { value, name } = e.currentTarget;
 
     switch (name) {
       case 'name':
         setName(value);
         break;
-      case 'phone':
-        setPhone(value);
+      case 'number':
+        setNumber(value);
         break;
+
       default:
-        return;
+        break;
     }
   };
 
-  return (
-    <Form onSubmit={handleSubmit}>
-      <Label>
-        Name
-        <Input
-          type="text"
-          name="name"
-          value={name}
-          onChange={handleChange}
-          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-          required
-        />
-      </Label>
-      <Label>
-        Number
-        <Input
-          type="tel"
-          name="phone"
-          value={phone}
-          onChange={handleChange}
-          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-          required
-        />
-      </Label>
+  const handleSubmit = evt => {
+    evt.preventDefault();
 
-      <Button type="submit">Add contact</Button>
-    </Form>
+    if (contacts.find(contact => contact.name === name)) {
+      return toast.warn(`${name} is already in contacts.`, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
+    }
+
+    dispatch(addContact({ name, number }));
+
+    reset();
+  };
+
+  const reset = () => {
+    setName('');
+    setNumber('');
+  };
+
+  return (
+    <>
+      <h2>Add Contact</h2>
+      <Form onSubmit={handleSubmit}>
+        <Label>
+          Name
+          <Input
+            type="text"
+            name="name"
+            value={name}
+            placeholder="Enter your name"
+            onChange={handleChange}
+            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+            title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+            required
+          />
+        </Label>
+        <Label>
+          Number
+          <Input
+            type="tel"
+            name="number"
+            placeholder="Enter your phone number"
+            value={number}
+            onChange={handleChange}
+            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+            title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+            required
+          />
+        </Label>
+        <Button type="submit">Add contact</Button>
+      </Form>
+    </>
   );
 };
 

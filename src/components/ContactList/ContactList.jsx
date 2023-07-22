@@ -1,97 +1,90 @@
-// import { ContactWriper, ContactItem, ContactButton } from './ContactList.style';
-// import React from 'react';
-
-// import { nanoid } from 'nanoid';
-// import { useSelector } from 'react-redux';
-// import {
-//   useGetContactsQuery,
-//   useDeleteContactMutation,
-// } from 'redux/contactsSlice';
-// import { selectFilter } from 'redux/selectors';
-
-// const ContactList = () => {
-//   // const dispatch = useDispatch();
-
-//   // Виклик хука `useGetContactsQuery` для отримання списку контактів
-//   const { data } = useGetContactsQuery();
-
-//   // const contacts = useSelector(state => state.contacts.contacts);
-//   // const filter = useSelector(state => state.filter.filter);
-
-//   // Виклик хука `useDeleteContactMutation` для виконання мутації видалення контакту
-//   const [deleteContact] = useDeleteContactMutation();
-//   // Виклик селектора `selectFilter` для отримання значення фільтру
-//   const filter = useSelector(selectFilter);
-
-//   // Обробник видалення контакту
-//   const onDeleteContact = id => {
-//     // dispatch(deleteContact(id));
-//     deleteContact(id);
-//   };
-
-//   if (!data) {
-//     return;
-//   }
-
-//   // Нормалізація значення фільтру
-//   const normalizeFilter = filter.toLocaleLowerCase();
-
-// // Фільтрація контактів залежно від значення фільтру
-//   const filterContacts = data.filter(contact => {
-//     return contact.name.toLocaleLowerCase().includes(normalizeFilter);
-//   });
-
-//   return (
-//     <ContactWriper>
-//       {filterContacts.map(contact => {
-//         return (
-//           <ContactItem key={nanoid()}>
-//             <p>
-//               {contact.name}: {contact.phone}
-//             </p>
-//             <ContactButton
-//               type="button"
-//               onClick={() => {
-//                 onDeleteContact(contact.id);
-//               }}
-//             >
-//               Delete
-//             </ContactButton>
-//           </ContactItem>
-//         );
-//       })}
-//     </ContactWriper>
-//   );
-// };
-
-// export default ContactList;
-
-import React from 'react';
-import { ContactWriper, ContactItem, ContactButton } from './ContactList.style';
+import { nanoid } from 'nanoid';
+import {
+  ContactWriper,
+  ContactItem,
+  ContactInfo,  
+  ContactButton,
+  ButtonWrapper,
+  ModalWrapper,
+  ModalButton,
+  ModalTitle,
+  ModalText,
+} from './ContactList.styled';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectVisibleContacts } from 'redux/contacts/selectors';
-import { deleteContacts } from 'redux/contacts/contactsOperations';
+import { deleteContact } from 'redux/contacts/contactsOperations';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
+import {  toast } from 'react-toastify';
 
-// Компонент списку контактів
 const ContactList = () => {
-  const contacts = useSelector(selectVisibleContacts);
   const dispatch = useDispatch();
+
+  const contacts = useSelector(state => state.contacts.contacts);
+  const filter = useSelector(state => state.filter.filter);
+
+  const submit = id => {
+    confirmAlert({
+      customUI: ({ onClose }) => {
+        return (
+          <ModalWrapper className="custom-ui">
+            <ModalTitle>Are you sure?</ModalTitle>
+            <ModalText>You want to delete this contact?</ModalText>
+            <ButtonWrapper>
+              <ModalButton onClick={onClose}>No</ModalButton>
+              <ModalButton
+                onClick={() => {
+                  dispatch(deleteContact(id));
+                  toast.success('Success! The contact has been deleted', {
+                    position: 'top-left',
+                    autoClose: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: 'light',
+                  });
+                  onClose();
+                }}
+              >
+                Yes!
+              </ModalButton>
+            </ButtonWrapper>
+          </ModalWrapper>
+        );
+      },
+    });
+  };
+
+  const handleDeleteContact = id => {
+    submit(id);
+  };
+
+  const normalizeFilter = filter.toLocaleLowerCase();
+
+  const filterContacts = contacts.filter(contact => {
+    return contact.name.toLocaleLowerCase().includes(normalizeFilter);
+  });
+
   return (
     <ContactWriper>
-      {contacts.map(contact => (
-        <ContactItem key={contact.id}>
-          {contact.name + ' : ' + contact.phone}
-          {
+      {filterContacts.map(contact => {
+        return (
+          <ContactItem key={nanoid()}>
+            <ContactInfo>
+              {contact.name}: {contact.number}
+            </ContactInfo>
             <ContactButton
               type="button"
-              name="delete"
-              onClick={() => dispatch(deleteContacts(contact.id))}
+              onClick={() => {
+                handleDeleteContact(contact.id);
+              }}
             >
               Delete
             </ContactButton>
-          }
-        </ContactItem>
-      ))}
+          </ContactItem>
+        );
+      })}
     </ContactWriper>
   );
 };

@@ -1,104 +1,61 @@
-// import React, { useState, useEffect } from 'react';
-// import { nanoid } from 'nanoid';
-// import { Container, Title, SubTitle } from './App.style';
-// import { ContactForm } from './ContactForm/ContactForm';
-// import ContactList from './ContactList/ContactList';
-// import Filter from './Filter/Filter';
-
-// const initialState = [
-//   { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-//   { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-//   { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-//   { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-// ];
-
-// export function App() {
-//   const [contacts, setContacts] = useState(() => {
-//     const contactsLS = JSON.parse(localStorage.getItem('contacts'));
-//     return contactsLS ? contactsLS : initialState;
-//   });
-//   const [filter, setFilter] = useState('');
-
-//   // Додавання нового контакту в список контактів
-//   const formSubmitHandler = data => {
-//     const { name } = data;
-
-//     const isContactExists = contacts.some(contact => contact.name === name);
-
-//     if (isContactExists) {
-//       alert(`${name} is already in contacts`);
-//     } else {
-//       // Додавання нового контакта
-//       const newContact = { id: nanoid(), ...data };
-//       setContacts(prevContacts => [...prevContacts, newContact]);
-//     }
-//   };
-
-//   // Зміна значення фільтра
-//   const changeFilter = e => {
-//     setFilter(e.target.value);
-//   };
-
-//   // Отримання відфільтрованих контактів
-//   const getFilterContacts = () => {
-//       const normalizedFilter = filter.toLowerCase();
-
-//     return contacts.filter(contact =>
-//       contact.name.toLowerCase().includes(normalizedFilter)
-//     );
-//   };
-
-//   // Видалення контакту зі списку
-//   const deleteContact = contactId => {
-//     setContacts(prevContacts => prevContacts.filter(({ id }) => id !== contactId));
-//   };
-
-//   const filterContacts = getFilterContacts();
-
-//   useEffect(() => {
-//     if (contacts && contacts.length > 0) {
-//       localStorage.setItem('contacts', JSON.stringify(contacts));
-//     }
-//   }, [contacts]);
-
-//   return (
-//     <Container>
-//       <Title>Phonebook</Title>
-//       <ContactForm onSubmit={formSubmitHandler} />
-
-//       <SubTitle>Contacts</SubTitle>
-//       <Filter value={filter} onChangeFilter={changeFilter} />
-//       <ContactList contacts={filterContacts} onDeleteContact={deleteContact} />
-//     </Container>
-//   );
-// }
-
-import { Container, Title, SubTitle } from './App.style';
-
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchContacts } from 'redux/contacts/contactsOperations';
-import ContactForm from './ContactForm/ContactForm';
-import ContactList from './ContactList/ContactList';
-import Filter from './Filter/Filter';
+import { Route, Routes } from 'react-router-dom';
+import Layout from './Layout/Layout';
+import { lazy } from 'react';
+// import Home from 'pages/Home/Home';
+// import Login from 'pages/Login';
+// import Register from 'pages/Register';
+// import Contacts from 'pages/Contacts';
+import useAuth from 'hooks/useAuth';
+import { refreshUser } from 'redux/auth/authOperations';
+import { RestrictedRoute } from './RestrictedRoute';
+import { PrivateRoute } from './PrivateRoute';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const App = () => {
+const Home = lazy(() => import('pages/Home/Home'));
+const Login = lazy(() => import('pages/Login'));
+const Register = lazy(() => import('pages/Register'));
+const Contacts = lazy(() => import('pages/Contacts'));
+
+export const App = () => {
   const dispatch = useDispatch();
+  const { isRefreshing } = useAuth();
 
   useEffect(() => {
-    dispatch(fetchContacts());
+    dispatch(refreshUser());
   }, [dispatch]);
 
   return (
-    <Container>
-      <Title>Phonebook</Title>
-      <ContactForm />
-
-      <SubTitle>Contacts</SubTitle>
-      <Filter />
-      <ContactList />
-    </Container>
+    !isRefreshing && (
+      <>
+        <ToastContainer />
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route
+              path="/register"
+              element={
+                <RestrictedRoute component={Register} redirectTo="/contacts" />
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <RestrictedRoute component={Login} redirectTo="/contacts" />
+              }
+            />
+            <Route
+              path="/contacts"
+              element={
+                <PrivateRoute component={Contacts} redirectTo="/login" />
+              }
+            />
+            <Route path="*" element={<Home />} />
+          </Route>
+        </Routes>
+      </>
+    )
   );
 };
-
-export default App;
